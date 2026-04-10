@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Multimodal RAG Chat — Full Project Documentation</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 13px;
+    line-height: 1.65;
+    color: #1a1a2e;
+    background: #fff;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 40px 50px;
+  }
+  h1 { font-size: 28px; color: #0d1b2a; border-bottom: 3px solid #3b82f6; padding-bottom: 10px; margin-bottom: 6px; }
+  h2 { font-size: 20px; color: #1d4ed8; margin-top: 36px; margin-bottom: 10px; border-left: 4px solid #3b82f6; padding-left: 10px; }
+  h3 { font-size: 15px; color: #1e3a5f; margin-top: 22px; margin-bottom: 7px; }
+  h4 { font-size: 13px; color: #374151; margin-top: 14px; margin-bottom: 5px; font-weight: 700; }
+  p  { margin-bottom: 9px; }
+  ul, ol { margin-left: 22px; margin-bottom: 9px; }
+  li { margin-bottom: 4px; }
+  code {
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 11.5px;
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 3px;
+    padding: 1px 5px;
+    color: #0f172a;
+  }
+  pre {
+    background: #0f172a;
+    color: #e2e8f0;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 11px;
+    line-height: 1.6;
+    padding: 14px 18px;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin: 10px 0 14px 0;
+    border-left: 3px solid #3b82f6;
+  }
+  pre code { background: none; border: none; padding: 0; color: inherit; font-size: inherit; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 12px; }
+  th { background: #1d4ed8; color: #fff; text-align: left; padding: 7px 10px; }
+  td { padding: 6px 10px; border-bottom: 1px solid #e2e8f0; }
+  tr:nth-child(even) td { background: #f8fafc; }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-right: 5px;
+  }
+  .badge-blue  { background: #dbeafe; color: #1d4ed8; }
+  .badge-green { background: #dcfce7; color: #15803d; }
+  .badge-purple{ background: #ede9fe; color: #7c3aed; }
+  .badge-red   { background: #fee2e2; color: #b91c1c; }
+  .badge-yellow{ background: #fef9c3; color: #b45309; }
+  .callout {
+    background: #eff6ff;
+    border-left: 4px solid #3b82f6;
+    padding: 10px 15px;
+    border-radius: 0 6px 6px 0;
+    margin: 12px 0;
+    font-size: 12.5px;
+  }
+  .callout.warning { background: #fff7ed; border-color: #f97316; }
+  .callout.success { background: #f0fdf4; border-color: #22c55e; }
+  .section-divider { border: none; border-top: 2px solid #e2e8f0; margin: 30px 0; }
+  .subtitle { color: #6b7280; font-size: 13px; margin-bottom: 20px; }
+  .toc { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px 24px; margin: 24px 0; }
+  .toc h3 { margin-top: 0; color: #374151; }
+  .toc ol { margin-left: 18px; }
+  .toc li { margin-bottom: 3px; }
+  .toc a { color: #1d4ed8; text-decoration: none; }
+  .flow-step {
+    display: flex;
+    align-items: flex-start;
+    margin: 8px 0;
+    gap: 12px;
+  }
+  .flow-num {
+    background: #1d4ed8;
+    color: #fff;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .file-tree {
+    font-family: 'Consolas', monospace;
+    font-size: 11.5px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 14px 18px;
+    line-height: 1.8;
+  }
+  .kw { color: #7c3aed; }
+  .fn { color: #0369a1; }
+  .st { color: #15803d; }
+  .cm { color: #6b7280; font-style: italic; }
+  @media print {
+    body { padding: 20px 30px; font-size: 12px; }
+    h2 { page-break-before: auto; }
+    pre { white-space: pre-wrap; word-wrap: break-word; }
+    .toc { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<h1>Multimodal RAG Chat</h1>
+<p class="subtitle">Complete Project Documentation — Architecture, Code Walkthrough & Data Flow</p>
+<p>
+  <span class="badge badge-blue">Python 3.11+</span>
+  <span class="badge badge-blue">FastAPI</span>
+  <span class="badge badge-green">Next.js 15</span>
+  <span class="badge badge-green">TypeScript</span>
+  <span class="badge badge-purple">Pinecone</span>
+  <span class="badge badge-yellow">Euri API</span>
+  <span class="badge badge-red">Gemini Embedding 2</span>
+</p>
+
+<!-- TABLE OF CONTENTS -->
+<div class="toc">
+  <h3>Table of Contents</h3>
+  <ol>
+    <li><a href="#overview">Project Overview</a></li>
+    <li><a href="#architecture">Architecture & Tech Stack</a></li>
+    <li><a href="#structure">Project File Structure</a></li>
+    <li><a href="#env">Environment Variables</a></li>
+    <li><a href="#backend">Backend Deep-Dive</a>
+      <ol>
+        <li>Entry Point — main.py</li>
+        <li>Config — config.py</li>
+        <li>Euri Client — euri_client.py</li>
+        <li>Embedding Service — embedding.py</li>
+        <li>Vector Store — vectorstore.py</li>
+        <li>LLM Service — llm.py</li>
+        <li>RAG Pipeline — rag_pipeline.py</li>
+        <li>Processors (Text, PDF, Image, Audio, Video)</li>
+        <li>Routers (ingest.py, query.py)</li>
+        <li>Pydantic Schemas — schemas.py</li>
+      </ol>
+    </li>
+    <li><a href="#frontend">Frontend Deep-Dive</a>
+      <ol>
+        <li>Types — types.ts</li>
+        <li>useChat Hook</li>
+        <li>Chat Page & Components</li>
+        <li>Ingest Page & Components</li>
+      </ol>
+    </li>
+    <li><a href="#flow">End-to-End Data Flow</a></li>
+    <li><a href="#api">API Reference</a></li>
+    <li><a href="#constraints">Model Constraints & Limits</a></li>
+    <li><a href="#running">Running the Project</a></li>
+    <li><a href="#testing">Testing</a></li>
+  </ol>
+</div>
+
+<hr class="section-divider"/>
+
+<!-- ================================================================== -->
+<h2 id="overview">1. Project Overview</h2>
+
+<p>
+  This is a production-grade <strong>Multimodal Retrieval-Augmented Generation (RAG)</strong> system.
+  It allows users to upload and ingest content in <strong>5 modalities</strong> — plain text, PDFs,
+  images, audio files, and video files. All content is embedded using <strong>Gemini Embedding 2 Preview</strong>
+  via the <strong>Euri API</strong> and stored in a <strong>Pinecone</strong> serverless vector database.
+  Users then ask natural-language questions through a ChatGPT-style UI; the system retrieves the most
+  relevant content and generates a streaming answer using <strong>gpt-4o-mini</strong> (also via Euri).
+</p>
+
+<div class="callout">
+  <strong>Key design principle:</strong> The <em>Euri API</em> is the <em>sole</em> external AI provider.
+  Both embedding and LLM generation share a single API key and base URL
+  (<code>https://api.euron.one/api/v1/euri</code>), accessed through the standard OpenAI Python SDK.
+  No Google SDK or OpenAI default endpoint is used.
+</div>
+
+<hr class="section-divider"/>
+
+<!-- ================================================================== -->
+<h2 id="architecture">2. Architecture & Tech Stack</h2>
+
+<table>
+  <tr><th>Layer</th><th>Technology</th><th>Purpose</th></tr>
+  <tr><td>Embedding Model</td><td>gemini-embedding-2-preview</td><td>Converts all modalities to 768-dim vectors</td></tr>
+  <tr><td>Vector Database</td><td>Pinecone (serverless)</td><td>Stores and retrieves embedded vectors by cosine similarity</td></tr>
+  <tr><td>LLM</td><td>gpt-4o-mini</td><td>Generates answers from retrieved context</td></tr>
+  <tr><td>API Provider</td><td>Euri (<code>euron.one</code>)</td><td>OpenAI-compatible proxy for both above</td></tr>
+  <tr><td>Backend Framework</td><td>FastAPI (Python 3.11)</td><td>REST API + SSE streaming</td></tr>
+  <tr><td>Frontend Framework</td><td>Next.js 15 App Router</td><td>Chat + ingestion UI</td></tr>
+  <tr><td>Frontend Language</td><td>TypeScript (strict)</td><td>Type-safe API calls and UI state</td></tr>
+  <tr><td>Styling</td><td>Tailwind CSS v4</td><td>Dark-themed, responsive layout</td></tr>
+  <tr><td>Text Splitting</td><td>langchain-text-splitters</td><td>RecursiveCharacterTextSplitter for chunking</td></tr>
+  <tr><td>PDF Parsing</td><td>PyPDF2</td><td>Page-level text extraction</td></tr>
+  <tr><td>Video Processing</td><td>imageio-ffmpeg + ffmpeg</td><td>Frame extraction & duration probing</td></tr>
+  <tr><td>Retry Logic</td><td>tenacity</td><td>Exponential back-off on embedding API calls</td></tr>
+</table>
+
+<hr class="section-divider"/>
+
+<!-- ================================================================== -->
+<h2 id="structure">3. Project File Structure</h2>
+
+<div class="file-tree">
+Multimodal RAG Chat/<br/>
+├── CLAUDE.md                     <span class="cm">← Project rules &amp; architecture spec</span><br/>
+├── .gitignore<br/>
+│<br/>
+├── backend/<br/>
+│   ├── .env                      <span class="cm">← Secrets (git-ignored)</span><br/>
+│   ├── requirements.txt<br/>
+│   ├── pytest.ini<br/>
+│   ├── app/<br/>
+│   │   ├── main.py               <span class="cm">← FastAPI app entry, CORS, lifespan</span><br/>
+│   │   ├── config.py             <span class="cm">← Settings from env vars (lru_cache)</span><br/>
+│   │   ├── models/<br/>
+│   │   │   └── schemas.py        <span class="cm">← Pydantic request/response models</span><br/>
+│   │   ├── services/<br/>
+│   │   │   ├── euri_client.py    <span class="cm">← Shared OpenAI client → Euri base URL</span><br/>
+│   │   │   ├── embedding.py      <span class="cm">← Embed text/image/audio/video/PDF</span><br/>
+│   │   │   ├── vectorstore.py    <span class="cm">← Pinecone upsert, query, delete, list</span><br/>
+│   │   │   ├── llm.py            <span class="cm">← LLM generate + SSE stream + video describe</span><br/>
+│   │   │   └── rag_pipeline.py   <span class="cm">← Orchestrates embed→retrieve→generate</span><br/>
+│   │   ├── processors/<br/>
+│   │   │   ├── text_processor.py <span class="cm">← RecursiveCharacterTextSplitter chunking</span><br/>
+│   │   │   ├── pdf_processor.py  <span class="cm">← PyPDF2 page extraction, 6-page batches</span><br/>
+│   │   │   ├── image_processor.py<span class="cm">← Validates PNG/JPEG, batches up to 6</span><br/>
+│   │   │   ├── audio_processor.py<span class="cm">← Validates MP3/WAV for native embedding</span><br/>
+│   │   │   └── video_processor.py<span class="cm">← ffmpeg segmentation + frame extraction</span><br/>
+│   │   └── routers/<br/>
+│   │       ├── ingest.py         <span class="cm">← POST /ingest/{text,pdf,image,audio,video}</span><br/>
+│   │       └── query.py          <span class="cm">← POST /query and /query/stream (SSE)</span><br/>
+│   └── tests/<br/>
+│       ├── conftest.py<br/>
+│       ├── test_embedding.py<br/>
+│       ├── test_vectorstore.py<br/>
+│       ├── test_processors.py<br/>
+│       └── test_rag_pipeline.py<br/>
+│<br/>
+└── frontend/<br/>
+    ├── .env.local                <span class="cm">← NEXT_PUBLIC_API_URL (git-ignored)</span><br/>
+    ├── package.json<br/>
+    ├── tsconfig.json<br/>
+    ├── tailwind.config.ts<br/>
+    ├── next.config.ts<br/>
+    └── src/<br/>
+        ├── app/<br/>
+        │   ├── layout.tsx        <span class="cm">← Root layout with Sidebar</span><br/>
+        │   ├── page.tsx          <span class="cm">← Redirect → /chat</span><br/>
+        │   ├── error.tsx         <span class="cm">← Error boundary</span><br/>
+        │   ├── globals.css<br/>
+        │   ├── chat/page.tsx     <span class="cm">← Chat interface page</span><br/>
+        │   └── ingest/page.tsx   <span class="cm">← Data ingestion dashboard page</span><br/>
+        ├── components/<br/>
+        │   ├── chat/<br/>
+        │   │   ├── ChatWindow.tsx<br/>
+        │   │   ├── MessageBubble.tsx<br/>
+        │   │   ├── ChatInput.tsx<br/>
+        │   │   ├── SourceCard.tsx<br/>
+        │   │   └── StreamingText.tsx<br/>
+        │   ├── ingest/<br/>
+        │   │   ├── IngestDashboard.tsx<br/>
+        │   │   ├── FileUploader.tsx<br/>
+        │   │   ├── TextInput.tsx<br/>
+        │   │   ├── IngestionStatus.tsx<br/>
+        │   │   └── IngestedFiles.tsx<br/>
+        │   └── layout/<br/>
+        │       ├── Sidebar.tsx<br/>
+        │       └── Header.tsx<br/>
+        ├── lib/<br/>
+        │   ├── api.ts            <span class="cm">← All fetch calls to backend</span><br/>
+        │   └── types.ts          <span class="cm">← TypeScript interfaces</span><br/>
+        └── hooks/<br/>
+            ├── useChat.ts        <span class="cm">← Chat state + streaming</span><br/>
+            └── useIngest.ts      <span class="cm">← Upload state management</span><br/>
+</div>
+
+<hr class="section-divider"/>
+
+<!-- ================================================================== -->
+<h2 id="env">4. Environment Variables</h2>
+
+<h3>Backend (<code>backend/.env</code>)</h3>
+<pre><code>EURI_API_KEY=&lt;your_key&gt;
+EURI_BASE_URL=https://api.euron.one/api/v1/euri
+EURI_EMBEDDING_MODEL=gemini-embedding-2-preview
+EURI_LLM_MODEL=gpt-4o-mini
+PINECONE_API_KEY=&lt;your_key&gt;
+PINECONE_INDEX_NAME=rag-multimodal</code></pre>
+
+<h3>Frontend (<code>frontend/.env.local</code>)</h3>
+<pre><code>NEXT_PUBLIC_API_URL=http://localhost:8000</code></pre>
+
+<div class="callout warning">
+  <strong>Never commit .env files.</strong> Both are listed in <code>.gitignore</code>.
+  Use <code>python-dotenv</code> on the backend to load them automatically.
+</div>
+
+<hr class="section-divider"/>
+
+<!-- ================================================================== -->
+<h2 id="backend">5. Backend Deep-Dive</h2>
+
+<!-- 5.1 -->
+<h3>5.1 Entry Point — <code>app/main.py</code></h3>
+<p>Creates the FastAPI application, wires up middleware and routers, and initialises the Pinecone
+vector store on startup via an <code>asynccontextmanager</code> lifespan event.</p>
+
+<pre><code><span class="kw">@asynccontextmanager</span>
+<span class="kw">async def</span> <span class="fn">lifespan</span>(app):
+    vs = get_vectorstore()
+    <span class="kw">await</span> vs.initialize()   <span class="cm"># connects to Pinecone, creates index if missing</span>
+    <span class="kw">yield</span>
+
+app = FastAPI(title=<span class="st">"Multimodal RAG API"</span>, lifespan=lifespan)
+app.add_middleware(CORSMiddleware, allow_origins=[<span class="st">"http://localhost:3000"</span>], ...)
+app.include_router(ingest.router, prefix=<span class="st">"/ingest"</span>)
+app.include_router(query.router)</code></pre>
+
+<p><strong>Utility endpoints exposed directly on <code>app</code>:</strong></p>
+<ul>
+  <li><code>GET /health</code> — returns <code>{"status":"ok"}</code></li>
+  <li><code>GET /ingested</code> — lists all ingested files with chunk counts</li>
+  <li><code>DELETE /ingested</code> — removes vectors for a specific file from Pinecone</li>
+</ul>
+
+<!-- 5.2 -->
+<h3>5.2 Config — <code>app/config.py</code></h3>
+<p>A plain <code>Settings</code> class reads every configurable value from environment variables.
+A <code>@lru_cache()</code> wrapper on <code>get_settings()</code> ensures the class is instantiated
+only once for the lifetime of the process.</p>
+
+<table>
+  <tr><th>Setting</th><th>Default</th><th>Description</th></tr>
+  <tr><td>euri_api_key</td><td>—</td><td>Used for all Euri API calls</td></tr>
+  <tr><td>euri_base_url</td><td>https://api.euron.one/api/v1/euri</td><td>OpenAI-compatible endpoint</td></tr>
+  <tr><td>euri_embedding_model</td><td>gemini-embedding-2-preview</td><td>Model for all embeddings</td></tr>
+  <tr><td>euri_llm_model</td><td>gpt-4o-mini</td><td>Model for answer generation</td></tr>
+  <tr><td>pinecone_api_key</td><td>—</td><td>Pinecone authentication</td></tr>
+  <tr><td>pinecone_index_name</td><td>rag-multimodal</td><td>Pinecone index to use</td></tr>
+  <tr><td>embedding_dimensions</td><td>768</td><td>Must match Gemini output</td></tr>
+  <tr><td>embedding_chunk_size</td><td>1024 tokens</td><td>Max tokens per text chunk</td></tr>
+  <tr><td>embedding_chunk_overlap</td><td>256 tokens</td><td>Overlap between adjacent chunks</td></tr>
+  <tr><td>pinecone_upsert_batch_size</td><td>100</td><td>Max vectors per upsert call</td></tr>
+  <tr><td>pinecone_default_top_k</td><td>5</td><td>Default retrieval results</td></tr>
+  <tr><td>llm_temperature</td><td>0.3</td><td>Low creativity for factual answers</td></tr>
+  <tr><td>llm_max_tokens</td><td>2048</td><td>Max output tokens from LLM</td></tr>
+  <tr><td>max_images_per_batch</td><td>6</td><td>Gemini limit: 6 images per embedding call</td></tr>
+  <tr><td>max_pdf_pages_per_batch</td><td>6</td><td>Gemini limit: 6 PDF pages per call</td></tr>
+  <tr><td>max_video_seconds</td><td>120</td><td>Gemini limit: 120s per video embedding</td></tr>
+</table>
+
+<!-- 5.3 -->
+<h3>5.3 Euri Client — <code>app/services/euri_client.py</code></h3>
+<p>Creates a single, cached <code>OpenAI</code> client instance pointed at the Euri base URL.
+Because it is decorated with <code>@lru_cache()</code>, the same object is reused across every
+request — no re-authentication overhead.</p>
+
+<pre><code><span class="kw">from</span> openai <span class="kw">import</span> OpenAI
+
+<span class="kw">@lru_cache</span>()
+<span class="kw">def</span> <span class="fn">get_euri_client</span>() -> OpenAI:
+    settings = get_settings()
+    <span class="kw">return</span> OpenAI(
+        api_key=settings.euri_api_key,
+        base_url=settings.euri_base_url,  <span class="cm"># overrides default openai.com endpoint</span>
+    )</code></pre>
+
+<!-- 5.4 -->
+<h3>5.4 Embedding Service — <code>app/services/embedding.py</code></h3>
+<p>All five modalities are embedded using the same Euri endpoint. The core sync call is wrapped
+with <strong>tenacity</strong> retry logic (3 attempts, exponential back-off 2–30 s). Because
+FastAPI is async but the OpenAI SDK's <code>embeddings.create()</code> is synchronous, all
+embedding calls are offloaded to the default thread-pool executor via
+<code>loop.run_in_executor(None, ...)</code>.</p>
+
+<h4>Functions</h4>
+<table>
+  <tr><th>Function</th><th>Input</th><th>Output</th></tr>
+  <tr><td><code>embed_texts(chunks)</code></td><td>list[str]</td><td>list[list[float]] — one 768-dim vector per chunk</td></tr>
+  <tr><td><code>embed_single_text(text)</code></td><td>str</td><td>list[float] — single 768-dim vector</td></tr>
+  <tr><td><code>embed_image_batch(image_bytes_list, mime_type)</code></td><td>list[bytes] (max 6)</td><td>list[list[float]]</td></tr>
+  <tr><td><code>embed_audio(audio_bytes, mime_type)</code></td><td>bytes</td><td>list[float]</td></tr>
+  <tr><td><code>embed_pdf_pages(pdf_pages_text)</code></td><td>list[str]</td><td>list[list[float]]</td></tr>
+  <tr><td><code>embed_video_segment(video_bytes, mime_type)</code></td><td>bytes</td><td>list[float]</td></tr>
+</table>
+
+<p>Non-text modalities (images, audio, video) are base64-encoded and passed as data URIs in
+the format <code>data:&lt;mime&gt;;base64,&lt;data&gt;</code> — the same text input field that
+accepts strings. The Gemini model natively understands these data URIs.</p>
+
+<pre><code><span class="cm"># Example: how images become embeddings</span>
+inputs = [<span class="st">f"data:{mime_type};base64,{base64.b64encode(img).decode()}"</span>
+          <span class="kw">for</span> img <span class="kw">in</span> image_bytes_list]
+response = client.embeddings.create(model=<span class="st">"gemini-embedding-2-preview"</span>,
+                                    input=inputs, dimensions=768)</code></pre>
+
+<!-- 5.5 -->
+<h3>5.5 Vector Store — <code>app/services/vectorstore.py</code></h3>
+<p>Wraps the Pinecone Python client. Uses <strong>one namespace per source type</strong>
+to allow optional filtering during queries.</p>
+
+<table>
+  <tr><th>Namespace</th><th>Source Type</th></tr>
+  <tr><td>ns_text</td><td>Plain text</td></tr>
+  <tr><td>ns_pdf</td><td>PDF documents</td></tr>
+  <tr><td>ns_image</td><td>Images (PNG/JPEG)</td></tr>
+  <tr><td>ns_audio</td><td>Audio files (MP3/WAV)</td></tr>
+  <tr><td>ns_video</td><td>Video files (MP4/MOV)</td></tr>
+</table>
+
+<h4>Key methods</h4>
+<ul>
+  <li><code>initialize()</code> — connects to Pinecone; creates the index (dim=768, metric=cosine, serverless on AWS us-east-1) if it does not already exist.</li>
+  <li><code>upsert_vectors()</code> — builds vector records with rich metadata (<code>source_type</code>, <code>source_file</code>, <code>chunk_index</code>, <code>content_preview</code>, <code>timestamp</code>) and upserts in batches of 100.</li>
+  <li><code>query()</code> — queries one namespace (if <code>source_type</code> filter given) or all 5 namespaces, then merges and re-ranks by score to return top-k <code>SourceReference</code> objects.</li>
+  <li><code>delete_file()</code> — fetches up to 1000 matching vector IDs by file name and deletes them.</li>
+  <li><code>list_ingested_files()</code> — for each namespace, probes stats and samples vectors to reconstruct a list of ingested files.</li>
+</ul>
+
+<pre><code><span class="cm"># Vector ID format: &lt;type&gt;_&lt;filename&gt;_&lt;chunk_idx&gt;_&lt;8-hex-random&gt;</span>
+vector_id = <span class="st">f"{source_type}_{source_file}_{chunk_idx}_{uuid.uuid4().hex[:8]}"</span></code></pre>
+
+<!-- 5.6 -->
+<h3>5.6 LLM Service — <code>app/services/llm.py</code></h3>
+<p>Two generation modes: synchronous JSON response and async SSE streaming. Both use the same
+system prompt that strictly instructs the model to answer only from retrieved context.</p>
+
+<h4>System Prompt (verbatim)</h4>
+<pre><code>You are a helpful AI assistant that answers questions based ONLY on the provided context.
+Rules:
+1. Answer using ONLY the information found in the context.
+2. If context is insufficient, say so — do NOT make up information.
+3. Be concise, accurate, and helpful.
+4. You may mention the source file name.
+5. Do not hallucinate facts not in the context.</code></pre>
+
+<h4>User Message Construction</h4>
+<p>Retrieved chunks are formatted and prepended to the user's question:</p>
+<pre><code>Context:
+[Source 1] File: report.pdf (Type: pdf, Chunk: 0)
+&lt;first 200 chars of chunk 0&gt;
+
+[Source 2] File: notes.txt (Type: text, Chunk: 3)
+&lt;first 200 chars of chunk 3&gt;
+
+Question: What is the conclusion?</code></pre>
+
+<h4>Streaming SSE Protocol</h4>
+<p>The stream yields three event types:</p>
+<ul>
+  <li><code>data: {"content": "&lt;token&gt;"}</code> — one per LLM output token</li>
+  <li><code>data: {"sources": [...]}</code> — full source references, sent after stream ends</li>
+  <li><code>data: [DONE]</code> — terminal signal</li>
+</ul>
+
+<h4>Video Description</h4>
+<p><code>describe_video_frames(frames, filename)</code> is a special vision call that sends up to
+6 JPEG frames extracted from a video to the LLM with a multi-part prompt asking it to describe
+topics, key concepts, visible text/diagrams, and the overall narrative. The resulting text
+description is then chunked and embedded as text vectors.</p>
+
+<!-- 5.7 -->
+<h3>5.7 RAG Pipeline — <code>app/services/rag_pipeline.py</code></h3>
+<p>Thin orchestration layer. The two public functions are called by the routers:</p>
+
+<pre><code><span class="kw">async def</span> <span class="fn">run_query</span>(question, source_type, top_k) -> QueryResponse:
+    query_vector = <span class="kw">await</span> embed_single_text(question)
+    sources      = <span class="kw">await</span> vs.query(query_vector, top_k, source_type)
+    answer       = <span class="kw">await</span> generate_response(question, sources)
+    <span class="kw">return</span> QueryResponse(answer=answer, sources=sources, question=question)
+
+<span class="kw">async def</span> <span class="fn">run_query_stream</span>(question, source_type, top_k) -> AsyncGenerator[str]:
+    query_vector = <span class="kw">await</span> embed_single_text(question)
+    sources      = <span class="kw">await</span> vs.query(query_vector, top_k, source_type)
+    <span class="kw">async for</span> chunk <span class="kw">in</span> stream_response(question, sources):
+        <span class="kw">yield</span> chunk</code></pre>
+
+<!-- 5.8 -->
+<h3>5.8 Processors</h3>
+
+<h4>Text Processor (<code>text_processor.py</code>)</h4>
+<p>Uses <code>RecursiveCharacterTextSplitter</code> from <code>langchain-text-splitters</code>.
+Converts token limits to character counts (1 token ≈ 4 characters) and splits on
+<code>["\n\n", "\n", ". ", " ", ""]</code> in priority order. Returns <code>TextChunk</code>
+dataclass objects with <code>text</code>, <code>chunk_index</code>, and <code>content_preview</code>.</p>
+<pre><code>chunk_size_chars  = 1024 * 4  <span class="cm"># = 4096 chars</span>
+chunk_overlap_chars = 256 * 4 <span class="cm"># = 1024 chars</span></code></pre>
+
+<h4>PDF Processor (<code>pdf_processor.py</code>)</h4>
+<p>Uses <code>PyPDF2.PdfReader</code> to extract text page-by-page. Groups pages into batches of
+up to 6 (Gemini's PDF limit). If a page has no extractable text (image-only scanned PDF), it inserts
+a placeholder string rather than silently dropping it. Returns <code>PDFPageBatch</code> dataclass objects.</p>
+
+<h4>Image Processor (<code>image_processor.py</code>)</h4>
+<p>Validates file extensions (<code>.png</code>, <code>.jpg</code>, <code>.jpeg</code>). Groups
+uploaded images into batches of up to 6. Returns <code>ImageBatch</code> objects containing
+<code>ImageItem</code> entries with <code>image_bytes</code>, <code>mime_type</code>, and <code>filename</code>.</p>
+
+<h4>Audio Processor (<code>audio_processor.py</code>)</h4>
+<p>Validates <code>.mp3</code>/<code>.wav</code> files and wraps them in an <code>AudioItem</code>
+dataclass. No transcription is performed — audio is passed directly to the embedding model as a
+base64 data URI.</p>
+
+<h4>Video Processor (<code>video_processor.py</code>)</h4>
+<p>Two code paths:</p>
+<ol>
+  <li><strong>With ffmpeg available</strong> (<code>_try_ffmpeg_segment</code>): Uses <code>ffprobe</code>
+  to measure exact duration, then <code>ffmpeg</code> to cut accurate 120-second segments.</li>
+  <li><strong>Without ffmpeg</strong> (fallback): Estimates duration from file size at 1 Mbps and
+  splits by byte ranges (not frame-accurate).</li>
+</ol>
+<p>Frame extraction (<code>extract_frames_as_jpeg</code>) uses the bundled binary from
+<code>imageio-ffmpeg</code>. It probes duration from ffmpeg stderr, then extracts up to 6 evenly-spaced
+JPEG frames via individual <code>ffmpeg -ss ... -vframes 1</code> subprocess calls.</p>
+
+<!-- 5.9 -->
+<h3>5.9 Routers</h3>
+
+<h4>Ingestion Router (<code>routers/ingest.py</code>)</h4>
+<p>Five POST endpoints. Each follows the same pattern:</p>
+<div class="flow-step"><div class="flow-num">1</div><div>Read uploaded bytes</div></div>
+<div class="flow-step"><div class="flow-num">2</div><div>Validate (extension, size, non-empty)</div></div>
+<div class="flow-step"><div class="flow-num">3</div><div>Run the appropriate processor → chunks/batches/segments</div></div>
+<div class="flow-step"><div class="flow-num">4</div><div>Call the appropriate embedding function</div></div>
+<div class="flow-step"><div class="flow-num">5</div><div>Upsert to Pinecone (initialise if not yet done)</div></div>
+<div class="flow-step"><div class="flow-num">6</div><div>Return <code>IngestResponse</code> with chunk count</div></div>
+
+<p><strong>Special: Video ingestion</strong> adds an extra step between 3 and 4:</p>
+<pre><code><span class="cm"># Extract frames → vision LLM describes the video → embed the text description</span>
+<span class="kw">for</span> segment <span class="kw">in</span> segments:
+    frames      = extract_frames_as_jpeg(segment.video_bytes, filename)
+    description = <span class="kw">await</span> describe_video_frames(frames, filename)
+    chunks      = chunk_text(description, source_name=filename)
+    vectors     = <span class="kw">await</span> embed_texts([c.text <span class="kw">for</span> c <span class="kw">in</span> chunks])</code></pre>
+
+<h4>Query Router (<code>routers/query.py</code>)</h4>
+<ul>
+  <li><code>POST /query</code> — delegates to <code>run_query()</code>, returns <code>QueryResponse</code> JSON.</li>
+  <li><code>POST /query/stream</code> — delegates to <code>run_query_stream()</code>, wraps the async generator
+  in a <code>StreamingResponse</code> with <code>media_type="text/event-stream"</code> and
+  cache-control headers for SSE compatibility.</li>
+</ul>
+
+<!-- 5.10 -->
+<h3>5.10 Pydantic Schemas — <code>app/models/schemas.py</code></h3>
+
+<table>
+  <tr><th>Model</th><th>Used for</th></tr>
+  <tr><td>SourceReference</td><td>A retrieved chunk (type, file, chunk_index, preview, score, timestamp)</td></tr>
+  <tr><td>TextIngestRequest</td><td>POST /ingest/text body</td></tr>
+  <tr><td>IngestResponse</td><td>Response from all ingest endpoints</td></tr>
+  <tr><td>QueryRequest</td><td>POST /query and /query/stream body</td></tr>
+  <tr><td>QueryResponse</td><td>Response from POST /query (non-streaming)</td></tr>
+  <tr><td>IngestedFileRecord</td><td>One file entry in GET /ingested</td></tr>
+  <tr><td>IngestedFilesResponse</td><td>Full response from GET /ingested</td></tr>
+</table>
+
+<hr class="section-divider"/>
+
+<!-- ================================================================== -->
+<h2 id="frontend">6. Frontend Deep-Dive</h2>
+
+<!-- 6.1 -->
+<h3>6.1 TypeScript Types — <code>src/lib/types.ts</code></h3>
+<p>Defines interfaces mirroring every backend Pydantic model plus UI-specific state types. Key types:</p>
+<ul>
+  <li><code>ChatMessage</code> — <code>id</code>, <code>role</code>, <code>content</code>, <code>sources?</code>, <code>isStreaming?</code>, <code>error?</code>, <code>timestamp</code></li>
+  <li><code>UploadItem</code> — per-file upload state: <code>status</code> (idle/uploading/processing/success/error), <code>progress</code>, <code>message</code></li>
+  <li><code>SSEContentEvent</code>, <code>SSESourcesEvent</code>, <code>SSEErrorEvent</code> — discriminated union for parsing SSE stream</li>
+</ul>
+
+<!-- 6.2 -->
+<h3>6.2 <code>useChat</code> Hook — <code>src/hooks/useChat.ts</code></h3>
+<p>Manages the entire chat session state using <code>useState</code>. Uses an
+<code>AbortController</code> ref to support mid-stream cancellation.</p>
+
+<h4>State managed</h4>
+<ul>
+  <li><code>messages: ChatMessage[]</code> — full conversation history</li>
+  <li><code>isLoading: boolean</code> — true while streaming</li>
+  <li><code>error: string | null</code></li>
+</ul>
+
+<h4>Flow when user sends a message</h4>
+<div class="flow-step"><div class="flow-num">1</div><div>Append <code>userMessage</code> and a placeholder <code>assistantMessage</code> (isStreaming=true) to state</div></div>
+<div class="flow-step"><div class="flow-num">2</div><div>Call <code>queryStream()</code> from <code>api.ts</code> with the AbortController signal</div></div>
+<div class="flow-step"><div class="flow-num">3</div><div><code>onToken</code> callback: appends each token to <code>assistantMessage.content</code> via immutable state update</div></div>
+<div class="flow-step"><div class="flow-num">4</div><div><code>onSources</code> callback: sets <code>assistantMessage.sources</code></div></div>
+<div class="flow-step"><div class="flow-num">5</div><div><code>onDone</code> callback: sets <code>isStreaming=false</code>, clears loading state</div></div>
+<div class="flow-step"><div class="flow-num">6</div><div><code>onError</code> callback: sets error message in message and global error state</div></div>
+
+<!-- 6.3 -->
+<h3>6.3 Chat Page &amp; Components</h3>
+
+<table>
+  <tr><th>Component</th><th>Responsibility</th></tr>
+  <tr><td>chat/page.tsx</td><td>"use client" page; calls useChat hook; renders Header + ChatWindow</td></tr>
+  <tr><td>ChatWindow.tsx</td><td>Scrollable message list + ChatInput bar; auto-scrolls to bottom on new messages</td></tr>
+  <tr><td>MessageBubble.tsx</td><td>User bubble (right, coloured) vs. assistant bubble (left, neutral); renders StreamingText for assistant</td></tr>
+  <tr><td>ChatInput.tsx</td><td>Textarea with Enter-to-send, Shift+Enter for newline; optional source type filter dropdown; stop button during streaming</td></tr>
+  <tr><td>SourceCard.tsx</td><td>Displays one retrieved source: type badge, filename, score, content preview, timestamp</td></tr>
+  <tr><td>StreamingText.tsx</td><td>Renders content with a blinking cursor while isStreaming=true</td></tr>
+</table>
+
+<!-- 6.4 -->
+<h3>6.4 Ingest Page &amp; Components</h3>
+
+<table>
+  <tr><th>Component</th><th>Responsibility</th></tr>
+  <tr><td>ingest/page.tsx</td><td>"use client" page; renders IngestDashboard</td></tr>
+  <tr><td>IngestDashboard.tsx</td><td>Container: hosts FileUploader, TextInput, IngestionStatus list, IngestedFiles</td></tr>
+  <tr><td>FileUploader.tsx</td><td>Drag-and-drop zone; accepts .txt .pdf .png .jpg .jpeg .mp3 .wav .mp4 .mov; auto-detects modality; calls useIngest</td></tr>
+  <tr><td>TextInput.tsx</td><td>Textarea for raw text paste + submit button; calls POST /ingest/text</td></tr>
+  <tr><td>IngestionStatus.tsx</td><td>Progress bar + status badge per file in the upload queue</td></tr>
+  <tr><td>IngestedFiles.tsx</td><td>Fetches GET /ingested on mount; lists files with type, chunk count, timestamp; supports delete</td></tr>
+</table>
+
+<hr class="section-divider"/>
+
+<!-- ================================================================== -->
+<h2 id="flow">7. End-to-End Data Flow</h2>
+
+<h3>7.1 Ingestion Flow</h3>
+<div class="flow-step"><div class="flow-num">1</div><div>User drags/drops a file (or pastes text) on the Ingest page</div></div>
+<div class="flow-step"><div class="flow-num">2</div><div>Frontend detects modality from extension → calls the correct <code>POST /ingest/&lt;type&gt;</code></div></div>
+<div class="flow-step"><div class="flow-num">3</div><div>Backend validates the file, runs the appropriate processor to split into chunks/batches</div></div>
+<div class="flow-step"><div class="flow-num">4</div><div>Chunks are embedded via <code>embedding.py</code> → Euri API → Gemini Embedding 2 Preview → 768-dim vectors</div></div>
+<div class="flow-step"><div class="flow-num">5</div><div>Vectors upserted to Pinecone in batches of 100 with full metadata</div></div>
+<div class="flow-step"><div class="flow-num">6</div><div>JSON response returned to frontend; IngestionStatus component shows success</div></div>
+
+<h3>7.2 Query / Chat Flow</h3>
+<div class="flow-step"><div class="flow-num">1</div><div>User types question in ChatInput and presses Enter</div></div>
+<div class="flow-step"><div class="flow-num">2</div><div><code>useChat.sendMessage()</code> adds placeholder messages and calls <code>queryStream()</code></div></div>
+<div class="flow-step"><div class="flow-num">3</div><div>Frontend POSTs to <code>/query/stream</code> with question, optional source_type filter, top_k=5</div></div>
+<div class="flow-step"><div class="flow-num">4</div><div>Backend embeds the question → 768-dim query vector</div></div>
+<div class="flow-step"><div class="flow-num">5</div><div>Pinecone queried across all (or filtered) namespaces; top-5 chunks returned</div></div>
+<div class="flow-step"><div class="flow-num">6</div><div>Prompt built: system instruction + formatted context + question</div></div>
+<div class="flow-step"><div class="flow-num">7</div><div>LLM called with <code>stream=True</code> → tokens yielded as SSE <code>data: {"content": "..."}</code> events</div></div>
+<div class="flow-step"><div class="flow-num">8</div><div>After all tokens, SSE <code>data: {"sources": [...]}</code> then <code>data: [DONE]</code></div></div>
+<div class="flow-step"><div class="flow-num">9</div><div>Frontend <code>useChat</code> accumulates tokens into the assistant message; sources appear below</div></div>
+
+<hr class="section-divider"/>
+
+<!-- ================================================================== -->
+<h2 id="api">8. API Reference</h2>
+
+<h3>Ingestion Endpoints</h3>
+<table>
+  <tr><th>Method</th><th>Path</th><th>Body / Params</th><th>Returns</th></tr>
+  <tr><td>POST</td><td>/ingest/text</td><td>JSON: {text, source_name?}</td><td>IngestResponse</td></tr>
+  <tr><td>POST</td><td>/ingest/pdf</td><td>multipart: file (PDF)</td><td>IngestResponse</td></tr>
+  <tr><td>POST</td><td>/ingest/image</td><td>multipart: files[] (PNG/JPEG)</td><td>IngestResponse</td></tr>
+  <tr><td>POST</td><td>/ingest/audio</td><td>multipart: file (MP3/WAV)</td><td>IngestResponse</td></tr>
+  <tr><td>POST</td><td>/ingest/video</td><td>multipart: file (MP4/MOV)</td><td>IngestResponse</td></tr>
+</table>
+
+<h3>Query Endpoints</h3>
+<table>
+  <tr><th>Method</th><th>Path</th><th>Body</th><th>Returns</th></tr>
+  <tr><td>POST</td><td>/query</td><td>JSON: {question, source_type?, top_k?}</td><td>QueryResponse (JSON)</td></tr>
+  <tr><td>POST</td><td>/query/stream</td><td>Same as above</td><td>text/event-stream (SSE)</td></tr>
+</table>
+
+<h3>Utility Endpoints</h3>
+<table>
+  <tr><th>Method</th><th>Path</th><th>Returns</th></tr>
+  <tr><td>GET</td><td>/health</td><td>{"status":"ok","service":"multimodal-rag-api"}</td></tr>
+  <tr><td>GET</td><td>/ingested</td><td>{"files":[...], "total": N}</td></tr>
+  <tr><td>DELETE</td><td>/ingested?source_type=...&amp;source_file=...</td><td>{"deleted": N, ...}</td></tr>
+</table>
+
+<hr class="section-divider"/>
+
+<!-- ================================================================== -->
+<h2 id="constraints">9. Model Constraints &amp; Limits</h2>
+
+<table>
+  <tr><th>Modality</th><th>Hard Limit</th><th>How Handled</th></tr>
+  <tr><td>Text</td><td>8192 input tokens per request</td><td>RecursiveCharacterTextSplitter chunks at 1024 tokens (4096 chars) with 256-token overlap</td></tr>
+  <tr><td>Images</td><td>6 images per embedding call; PNG &amp; JPEG only</td><td>image_processor batches into groups of ≤6</td></tr>
+  <tr><td>PDF</td><td>6 pages per embedding call</td><td>pdf_processor batches into groups of ≤6 pages</td></tr>
+  <tr><td>Audio</td><td>Native ingestion — no transcription needed</td><td>Passed as base64 data URI directly to embedding model</td></tr>
+  <tr><td>Video</td><td>120 seconds per embedding segment</td><td>video_processor segments via ffmpeg; frames extracted → vision LLM → text description → embed</td></tr>
+  <tr><td>Vector dimension</td><td>Exactly 768 floats</td><td>All embeddings use <code>dimensions=768</code>; Pinecone index created with <code>dimension=768</code></td></tr>
+</table>
+
+<hr class="section-divider"/>
+
+<!-- ================================================================== -->
+<h2 id="running">10. Running the Project</h2>
+
+<h3>Backend</h3>
+<pre><code>cd backend
+pip install -r requirements.txt
+<span class="cm"># Fill in backend/.env with your EURI_API_KEY and PINECONE_API_KEY</span>
+uvicorn app.main:app --reload --port 8000</code></pre>
+<p>The API auto-docs are available at <code>http://localhost:8000/docs</code> (Swagger UI).</p>
+
+<h3>Frontend</h3>
+<pre><code>cd frontend
+npm install
+<span class="cm"># frontend/.env.local should contain: NEXT_PUBLIC_API_URL=http://localhost:8000</span>
+npm run dev   <span class="cm"># starts on http://localhost:3000</span></code></pre>
+
+<h3>Dependencies Summary</h3>
+<table>
+  <tr><th>Backend Package</th><th>Version</th><th>Purpose</th></tr>
+  <tr><td>fastapi</td><td>>=0.115</td><td>Web framework + dependency injection</td></tr>
+  <tr><td>uvicorn</td><td>>=0.34</td><td>ASGI server</td></tr>
+  <tr><td>openai</td><td>>=1.68</td><td>SDK for Euri API (embedding + LLM)</td></tr>
+  <tr><td>pinecone</td><td>>=6.0</td><td>Vector database client</td></tr>
+  <tr><td>python-dotenv</td><td>>=1.1</td><td>Loads .env files</td></tr>
+  <tr><td>pydantic</td><td>>=2.10</td><td>Request/response validation</td></tr>
+  <tr><td>python-multipart</td><td>>=0.0.20</td><td>File upload parsing</td></tr>
+  <tr><td>PyPDF2</td><td>>=3.0</td><td>PDF text extraction</td></tr>
+  <tr><td>Pillow</td><td>>=11.0</td><td>Image processing utilities</td></tr>
+  <tr><td>tenacity</td><td>>=9.0</td><td>Retry with exponential back-off</td></tr>
+  <tr><td>langchain-text-splitters</td><td>>=0.3</td><td>RecursiveCharacterTextSplitter</td></tr>
+  <tr><td>sse-starlette</td><td>>=2.2</td><td>SSE helpers for FastAPI</td></tr>
+  <tr><td>imageio-ffmpeg</td><td>latest</td><td>Bundled ffmpeg binary for video frames</td></tr>
+  <tr><td>pytest + pytest-asyncio</td><td>>=8.3 / >=0.25</td><td>Testing framework</td></tr>
+  <tr><td>httpx</td><td>>=0.28</td><td>Async HTTP client for tests</td></tr>
+</table>
+
+<hr class="section-divider"/>
+
+<!-- ================================================================== -->
+<h2 id="testing">11. Testing</h2>
+
+<p>Tests live in <code>backend/tests/</code> and are run with <code>pytest</code>
+(configured in <code>backend/pytest.ini</code>).</p>
+
+<table>
+  <tr><th>Test File</th><th>Tests</th></tr>
+  <tr><td>test_embedding.py</td><td>Unit tests for all embedding functions — Euri API calls are mocked</td></tr>
+  <tr><td>test_vectorstore.py</td><td>Tests for upsert, query, delete, list — Pinecone client is mocked</td></tr>
+  <tr><td>test_processors.py</td><td>Tests for all 5 processors using tiny sample files/strings</td></tr>
+  <tr><td>test_rag_pipeline.py</td><td>End-to-end pipeline test: embed → retrieve → generate (with mocks)</td></tr>
+</table>
+
+<div class="callout success">
+  <strong>Tip:</strong> For real integration tests, provide actual API keys via environment variables
+  and use small files (1-page PDF, 5-second audio, tiny JPEG) to keep costs and latency low.
+</div>
+
+<hr class="section-divider"/>
+
+<p style="text-align:center; color:#6b7280; font-size:11px; margin-top:30px;">
+  Generated: April 2026 &nbsp;|&nbsp; Multimodal RAG Chat &nbsp;|&nbsp; All code is in
+  <code>backend/</code> (Python/FastAPI) and <code>frontend/</code> (Next.js/TypeScript)
+</p>
+
+</body>
+</html>
